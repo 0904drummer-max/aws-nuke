@@ -2,7 +2,7 @@ name: nuke-dry-run-to-slack-educross
 on: push
 
 env:
-  AWS_NUKE_VERSION: 3.29.1
+  AWS_NUKE_VERSION: 3.51.0
   NUKE_OUTPUT: "None"
 
 jobs:
