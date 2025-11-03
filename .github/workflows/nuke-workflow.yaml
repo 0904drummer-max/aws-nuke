@@ -30,8 +30,6 @@ jobs:
           ls -la  # 展開したファイルをリスト表示
           ./aws-nuke version  # 正しいコマンドを実行
 
-aws sts get-caller-identity --query Account --output text
-
       - name: Run aws-nuke
         id: run_nuke
         run: |
