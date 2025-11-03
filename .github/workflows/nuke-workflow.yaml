@@ -33,13 +33,7 @@ jobs:
       - name: Run aws-nuke
         id: run_nuke
         run: |
-          ./aws-nuke nuke -c ./nuke-config.yml --no-dry-run --no-prompt > output.txt
-
-      - name: Save output from aws-nuke
-        id: save_output
-        run: |
-          grep "would remove" output.txt | awk -F" - " '{print $2, $3, $5}' > filtered_output.txt
-          cat filtered_output.txt
+          ./aws-nuke nuke -c ./nuke-config.yml
           
           # ファイルの内容を整形 - 改行を環境変数に設定
           OUTPUT=$(awk '{print $0 "\\n"}' filtered_output.txt | tr -d '\n')
