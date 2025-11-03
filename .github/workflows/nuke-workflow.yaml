@@ -34,7 +34,3 @@ jobs:
         id: run_nuke
         run: |
           ./aws-nuke nuke -c ./nuke-config.yml
-          
-          # ファイルの内容を整形 - 改行を環境変数に設定
-          OUTPUT=$(awk '{print $0 "\\n"}' filtered_output.txt | tr -d '\n')
-          echo "FILTERED_OUTPUT=$OUTPUT" >> $GITHUB_ENV  # 環境変数ファイルに設定
