@@ -1,36 +1,74 @@
 name: nuke-run
-on: push
+
+on:
+  push:                # push 時は dry-run（確認）を実行
+    branches:
+      - main
+  workflow_dispatch:   # 実削除は手動でのみ実行可能
 
 env:
   AWS_NUKE_VERSION: 3.51.0
   NUKE_OUTPUT: "None"
+  AWS_REGION: ap-northeast-1
 
 jobs:
   run_aws_nuke:
     name: Run aws-nuke
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
-      contents: write
+      id-token: write    # OIDC を使う場合に必要
+      contents: read     # checkout だけなら read で十分
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-        
+        uses: actions/checkout@v4
+
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ASSUMEROLE }}
-          aws-region: ap-northeast-1
-          
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Show caller identity
+        run: |
+          echo "=== AWS caller identity ==="
+          aws sts get-caller-identity || (echo "Failed to get caller identity" && exit 1)
+
       - name: Install AWS Nuke
         run: |
-          wget https://github.com/ekristen/aws-nuke/releases/download/v${{ env.AWS_NUKE_VERSION }}/aws-nuke-v${{ env.AWS_NUKE_VERSION }}-linux-amd64.tar.gz
-          tar -xvf aws-nuke-v${{ env.AWS_NUKE_VERSION }}-linux-amd64.tar.gz
-          # 実行ファイルの存在を確認
-          ls -la  # 展開したファイルをリスト表示
-          ./aws-nuke version  # 正しいコマンドを実行
+          wget -q https://github.com/ekristen/aws-nuke/releases/download/v${{ env.AWS_NUKE_VERSION }}/aws-nuke-v${{ env.AWS_NUKE_VERSION }}-linux-amd64.tar.gz
+          tar -xzf aws-nuke-v${{ env.AWS_NUKE_VERSION }}-linux-amd64.tar.gz
+          # 実行ファイルに実行権限を付与（アーカイブ内に aws-nuke がある前提）
+          chmod +x ./aws-nuke || true
+          echo "=== aws-nuke version ==="
+          ./aws-nuke version
 
-      - name: Run aws-nuke
-        id: run_nuke
+      - name: Dry-run aws-nuke (automatic on push)
+        if: github.event_name == 'push'
         run: |
-          ./aws-nuke nuke -c ./nuke-config.yml
+          echo "=== Running aws-nuke (dry-run) ==="
+          ./aws-nuke -c ./nuke-config.yml 2>&1 | tee nuke-dryrun.txt
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+
+      - name: Upload dry-run logs
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuke-dryrun-logs
+          path: nuke-dryrun.txt
+
+      - name: Run aws-nuke (REAL) — manual only
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "=== Running aws-nuke (REAL) ==="
+          # 実行は手動トリガー時のみ。--no-prompt を付けてCIでの対話を回避
+          ./aws-nuke nuke -c ./nuke-config.yml --no-dry-run --no-prompt 2>&1 | tee nuke-run.txt
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+
+      - name: Upload run logs
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuke-run-logs
+          path: nuke-run.txt
