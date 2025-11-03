@@ -39,4 +39,4 @@ resource-types:
     # - OrganizationsOrganization
 
 accounts:
-  "ACCOUNT_ID": 767546672507
+  "ACCOUNT_ID": "767546672507"
