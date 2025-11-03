@@ -1,6 +1,8 @@
 name: nuke-run
 
 on:
+  schedule:
+    - cron: '0 15 * * *'
   push:                # push 時は dry-run（確認）を実行
     branches:
       - main
