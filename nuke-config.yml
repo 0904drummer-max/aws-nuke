@@ -20,7 +20,15 @@ blocklist:
 resource-types:
   excludes:
     # --- IAM 関連を除外（代表的なリソース名を列挙） ---
-    - IAM*
+    - IAMUser
+    - IAMGroup
+    - IAMRole
+    - IAMPolicy
+    - IAMInstanceProfile
+    - OrganizationsAccount
+    - OrganizationsOrganization
+    - OrganizationsOrganizationalUnit
+    - Billing*
     # --- Budgets 関連を除外 ---
     - BudgetsBudget
 
