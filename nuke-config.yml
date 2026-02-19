@@ -25,6 +25,7 @@ resource-types:
     - IAMRole
     - IAMPolicy
     - IAMInstanceProfile
+    - IAMOpenIDConnectProvider
     - OrganizationsAccount
     - OrganizationsOrganization
     - OrganizationsOrganizationalUnit
