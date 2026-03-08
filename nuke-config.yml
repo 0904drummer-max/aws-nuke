@@ -30,6 +30,7 @@ resource-types:
     - OrganizationsOrganization
     - OrganizationsOrganizationalUnit
     - Billing*
+    - IAMSAMLProvider
     # --- Budgets 関連を除外 ---
     - BudgetsBudget
 
